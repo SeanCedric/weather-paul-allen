@@ -1,8 +1,19 @@
 from fastapi import FastAPI
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
 
 app = FastAPI()
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class Location(BaseModel):
     latitude: float
@@ -10,7 +21,6 @@ class Location(BaseModel):
 
 @app.post("/weather")
 def get_weather(location: Location):
-    # Open-Meteo gratis weer API (geen key nodig)
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
         "latitude": location.latitude,
