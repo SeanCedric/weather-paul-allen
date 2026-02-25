@@ -35,3 +35,22 @@ button:hover {
   background: #f8d7da;
   color: #721c24;
 }
+
+.youtube-btn {
+  display: inline-block;
+  background: #FF0000;
+  color: white;
+  padding: 12px 24px;
+  margin-top: 15px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.youtube-btn:hover {
+  background: #CC0000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}

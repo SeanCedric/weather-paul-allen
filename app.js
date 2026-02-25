@@ -41,23 +41,35 @@ function App() {
   };
 
   return (
-    <div>
-      <h1>🌡️ Paul Allen's Mix Checker</h1>
-      <p>Klik om de buitentemperatuur te checken!</p>
-      
-      <button onClick={checkWeather}>
-        {status || "Check buitentemperatuur"}
-      </button>
-      
-      {temp !== null && (
-        <div className={`result ${temp > 15 ? 'warm' : 'cold'}`}>
-          <h2>{temp.toFixed(1)}°C</h2>
-          <p>{temp > 15 ? "Mix time! 🎧" : "Wacht op warmer weer."}</p>
-        </div>
-      )}
-      
-      {error && <p style={{color: "red"}}>{error}</p>}
-    </div>
+  <div>
+    <h1>🌡️ Paul Allen's Mix Checker</h1>
+    <p>Klik om de buitentemperatuur te checken!</p>
+    
+    <button onClick={checkWeather}>
+      {status || "Check buitentemperatuur"}
+    </button>
+    
+    {temp !== null && (
+      <div className={`result ${temp > 15 ? 'warm' : 'cold'}`}>
+        <h2>{temp.toFixed(1)}°C</h2>
+        <p>{temp > 15 ? "Mix time! 🎧" : "Wacht op warmer weer."}</p>
+        
+        {/* YouTube knop */}
+        {temp > 15 && (
+          <a 
+            href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID_HERE" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="youtube-btn"
+          >
+            ▶️ Play Paul Allen's Mix on YouTube
+          </a>
+        )}
+      </div>
+    )}
+    
+    {error && <p style={{color: "red"}}>{error}</p>}
+  </div>
   );
 }
 
