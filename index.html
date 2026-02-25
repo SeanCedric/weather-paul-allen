@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>Paul Allen's Mix Checker</title>
+  <title>Paul Allen's Mix Checker - React</title>
   <style>
     body {
       font-family: sans-serif;
@@ -24,87 +24,101 @@
       background: #0056b3;
     }
   </style>
+  
+  <!-- React CDN's -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
-  <h1>🌡️ Paul Allen's Mix Checker</h1>
-  <p>Klik om de buitentemperatuur op jouw locatie te checken!</p>
-  
-  <button id="checkBtn">Check buitentemperatuur</button>
-  
-  <div id="result"></div>
+  <div id="root"></div>
 
-  <script>
-    // Wacht tot pagina geladen is
-    document.addEventListener('DOMContentLoaded', function() {
-      const button = document.getElementById('checkBtn');
-      const resultDiv = document.getElementById('result');
+  <script type="text/babel">
+    // ← BABEL maakt JSX mogelijk in browser
+    
+    // 1. React component (vervangt je JS functions)
+    function App() {
+      // 2. useState = je state (status, temp, error)
+      const [status, setStatus] = React.useState("");
+      const [temp, setTemp] = React.useState(null);
+      const [error, setError] = React.useState("");
       
-      button.addEventListener('click', function() {
-        button.textContent = 'Locatie ophalen...';
-        resultDiv.innerHTML = '';
-        
-        // 1. Vraag browser om locatie
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            function(position) {
-              const lat = position.coords.latitude;
-              const lon = position.coords.longitude;
-              
-              // 2. Stuur naar jouw backend
-              fetch('http://localhost:8000/weather', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({latitude: lat, longitude: lon})
-              })
-              .then(response => response.json())
-              .then(data => {
-                // 3. Toon resultaat
-                const temp = data.temperature;
-                button.textContent = 'Check opnieuw';
-                
-                if (data.is_warm) {
-                  resultDiv.innerHTML = `
-                    <div style="background: #d4edda; color: #155724; padding: 20px; border-radius: 10px; margin-top: 20px;">
-                      <h2>✅ ${temp.toFixed(1)}°C</h2>
-                      <p>Het is warm genoeg! 🎧<br>Luister naar Paul Allen's mix!</p>
-                    </div>
-                  `;
-                } else {
-                  resultDiv.innerHTML = `
-                    <div style="background: #f8d7da; color: #721c24; padding: 20px; border-radius: 10px; margin-top: 20px;">
-                      <h2>❄️ ${temp.toFixed(1)}°C</h2>
-                      <p>Te koud voor Paul Allen's mix.<br>Wacht tot het warmer wordt!</p>
-                    </div>
-                  `;
-                }
-              })
-              .catch(error => {
-                resultDiv.innerHTML = `
-                  <div style="color: red; padding: 20px;">
-                    Backend niet bereikbaar? Start: uvicorn main:app --port 8000
-                  </div>
-                `;
-                button.textContent = 'Check buitentemperatuur';
-              });
-            },
-            function(error) {
-              // Locatie geweigerd
-              resultDiv.innerHTML = `
-                <div style="color: red; padding: 20px;">
-                  Locatie geweigerd. Sta browser toe voor GPS.
-                </div>
-              `;
-              button.textContent = 'Check buitentemperatuur';
-            }
-          );
-        } else {
-          resultDiv.innerHTML = '<p>Browser ondersteunt geen GPS.</p>';
+      // 3. checkWeather functie (je oude JS, nu in React)
+      const checkWeather = () => {
+        setStatus("Locatie ophalen...");
+        setError("");
+        setTemp(null);
+
+        if (!navigator.geolocation) {
+          setError("Browser ondersteunt geen GPS.");
+          setStatus("");
+          return;
         }
-      });
-    });
+
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            setStatus("Temperatuur checken...");
+
+            try {
+              const response = await fetch('http://localhost:8000/weather', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ latitude, longitude })
+              });
+              const data = await response.json();
+
+              setTemp(data.temperature);
+              if (data.is_warm) {
+                setStatus("✅ Warm genoeg voor Paul Allen's mix! 🎧");
+              } else {
+                setStatus("❄️ Te koud voor de mix.");
+              }
+            } catch (e) {
+              setError("Backend niet bereikbaar?");
+              setStatus("");
+            }
+          },
+          (err) => {
+            setError("Locatie geweigerd.");
+            setStatus("");
+          }
+        );
+      };
+
+      // 4. JSX = HTML met JS (je oude HTML)
+      return (
+        <div>
+          <h1>🌡️ Paul Allen's Mix Checker</h1>
+          <p>Klik om de buitentemperatuur te checken!</p>
+          
+          <button onClick={checkWeather}>
+            {status ? status : "Check buitentemperatuur"}
+          </button>
+          
+          {temp !== null && (
+            <div style={{ 
+              background: temp > 15 ? "#d4edda" : "#f8d7da", 
+              color: temp > 15 ? "#155724" : "#721c24",
+              padding: "20px", 
+              borderRadius: "10px", 
+              marginTop: "20px"
+            }}>
+              <h2>{temp.toFixed(1)}°C</h2>
+              <p>{temp > 15 ? "Mix time! 🎧" : "Wacht op warmer weer."}</p>
+            </div>
+          )}
+          
+          {error && (
+            <p style={{color: "red", padding: "20px"}}>{error}</p>
+          )}
+        </div>
+      );
+    }
+
+    // 5. Render React app
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
   </script>
 </body>
 </html>
-
