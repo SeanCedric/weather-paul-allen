@@ -28,10 +28,83 @@
 <body>
   <h1>🌡️ Paul Allen's Mix Checker</h1>
   <p>Klik om de buitentemperatuur op jouw locatie te checken!</p>
-
+  
   <button id="checkBtn">Check buitentemperatuur</button>
-
+  
   <div id="result"></div>
+
+  <script>
+    // Wacht tot pagina geladen is
+    document.addEventListener('DOMContentLoaded', function() {
+      const button = document.getElementById('checkBtn');
+      const resultDiv = document.getElementById('result');
+      
+      button.addEventListener('click', function() {
+        button.textContent = 'Locatie ophalen...';
+        resultDiv.innerHTML = '';
+        
+        // 1. Vraag browser om locatie
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function(position) {
+              const lat = position.coords.latitude;
+              const lon = position.coords.longitude;
+              
+              // 2. Stuur naar jouw backend
+              fetch('http://localhost:8000/weather', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({latitude: lat, longitude: lon})
+              })
+              .then(response => response.json())
+              .then(data => {
+                // 3. Toon resultaat
+                const temp = data.temperature;
+                button.textContent = 'Check opnieuw';
+                
+                if (data.is_warm) {
+                  resultDiv.innerHTML = `
+                    <div style="background: #d4edda; color: #155724; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                      <h2>✅ ${temp.toFixed(1)}°C</h2>
+                      <p>Het is warm genoeg! 🎧<br>Luister naar Paul Allen's mix!</p>
+                    </div>
+                  `;
+                } else {
+                  resultDiv.innerHTML = `
+                    <div style="background: #f8d7da; color: #721c24; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                      <h2>❄️ ${temp.toFixed(1)}°C</h2>
+                      <p>Te koud voor Paul Allen's mix.<br>Wacht tot het warmer wordt!</p>
+                    </div>
+                  `;
+                }
+              })
+              .catch(error => {
+                resultDiv.innerHTML = `
+                  <div style="color: red; padding: 20px;">
+                    Backend niet bereikbaar? Start: uvicorn main:app --port 8000
+                  </div>
+                `;
+                button.textContent = 'Check buitentemperatuur';
+              });
+            },
+            function(error) {
+              // Locatie geweigerd
+              resultDiv.innerHTML = `
+                <div style="color: red; padding: 20px;">
+                  Locatie geweigerd. Sta browser toe voor GPS.
+                </div>
+              `;
+              button.textContent = 'Check buitentemperatuur';
+            }
+          );
+        } else {
+          resultDiv.innerHTML = '<p>Browser ondersteunt geen GPS.</p>';
+        }
+      });
+    });
+  </script>
 </body>
 </html>
 
