@@ -2,123 +2,14 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>Paul Allen's Mix Checker - React</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      max-width: 500px;
-      margin: 50px auto;
-      padding: 20px;
-      text-align: center;
-    }
-    button {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      font-size: 18px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-  </style>
-  
-  <!-- React CDN's -->
+  <title>Paul Allen's Mix Checker</title>
+  <link rel="stylesheet" href="style.css">
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
   <div id="root"></div>
-
-  <script type="text/babel">
-    // ← BABEL maakt JSX mogelijk in browser
-    
-    // 1. React component (vervangt je JS functions)
-    function App() {
-      // 2. useState = je state (status, temp, error)
-      const [status, setStatus] = React.useState("");
-      const [temp, setTemp] = React.useState(null);
-      const [error, setError] = React.useState("");
-      
-      // 3. checkWeather functie (je oude JS, nu in React)
-      const checkWeather = () => {
-        setStatus("Locatie ophalen...");
-        setError("");
-        setTemp(null);
-
-        if (!navigator.geolocation) {
-          setError("Browser ondersteunt geen GPS.");
-          setStatus("");
-          return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            const { latitude, longitude } = position.coords;
-            setStatus("Temperatuur checken...");
-
-            try {
-              const response = await fetch('http://localhost:8000/weather', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ latitude, longitude })
-              });
-              const data = await response.json();
-
-              setTemp(data.temperature);
-              if (data.is_warm) {
-                setStatus("✅ Warm genoeg voor Paul Allen's mix! 🎧");
-              } else {
-                setStatus("❄️ Te koud voor de mix.");
-              }
-            } catch (e) {
-              setError("Backend niet bereikbaar?");
-              setStatus("");
-            }
-          },
-          (err) => {
-            setError("Locatie geweigerd.");
-            setStatus("");
-          }
-        );
-      };
-
-      // 4. JSX = HTML met JS (je oude HTML)
-      return (
-        <div>
-          <h1>🌡️ Paul Allen's Mix Checker</h1>
-          <p>Klik om de buitentemperatuur te checken!</p>
-          
-          <button onClick={checkWeather}>
-            {status ? status : "Check buitentemperatuur"}
-          </button>
-          
-          {temp !== null && (
-            <div style={{ 
-              background: temp > 15 ? "#d4edda" : "#f8d7da", 
-              color: temp > 15 ? "#155724" : "#721c24",
-              padding: "20px", 
-              borderRadius: "10px", 
-              marginTop: "20px"
-            }}>
-              <h2>{temp.toFixed(1)}°C</h2>
-              <p>{temp > 15 ? "Mix time! 🎧" : "Wacht op warmer weer."}</p>
-            </div>
-          )}
-          
-          {error && (
-            <p style={{color: "red", padding: "20px"}}>{error}</p>
-          )}
-        </div>
-      );
-    }
-
-    // 5. Render React app
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+  <script type="text/babel" src="app.js"></script>
 </body>
 </html>
